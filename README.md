@@ -8,6 +8,16 @@ A small node.js library for automatically tagging Pocket articles based on regul
 
 ### Usage
 
+Make sure that you have a `~/.pocket/credentials` file that looks something like this:
+
+```ini
+[default]
+consumer_key = "12345-abc123fniewof2023f"
+access_token = "fwefi20r-232d-f2o2-2kd3"
+```
+
+You could use [pocket-auth-cli](https://github.com/mheap/pocket-auth-cli) to fetch your credentials and generate this for you automatically. Then, create a file with the following contents and run it (feel free to change the regex/rules used):
+
 ```javascript
 const PocketTagger = require("pocket-tagger");
 
