@@ -1,0 +1,29 @@
+{
+    "name": "pocket-tagger",
+    "description": "Auto-tag articles in your Pocket account based on a list of rules",
+    "version": "0.0.1",
+    "main": "src/index.js",
+    "scripts": {
+        "test": "nyc mocha",
+        "check-coverage": "nyc check-coverage --lines 100 --branches 100 --functions=100 --statements 100",
+        "test-html": "nyc --reporter html mocha",
+        "lint": "eslint src test",
+        "lint-fix": "eslint --fix src test"
+    },
+    "dependencies": {
+        "local-credentials": "^0.0.2",
+        "pocket-promise": "^1.1.0",
+        "url-tagger": "0.0.2"
+    },
+    "devDependencies": {
+        "chai": "^4.1.2",
+        "chai-as-promised": "^7.1.1",
+        "eslint": "^4.9.0",
+        "eslint-config-prettier": "^2.6.0",
+        "eslint-plugin-prettier": "^2.3.1",
+        "mocha": "^4.0.1",
+        "nyc": "^11.2.1",
+        "prettier": "^1.7.4",
+        "sinon": "^4.1.1"
+    }
+}
