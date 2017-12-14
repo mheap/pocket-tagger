@@ -16,7 +16,7 @@ consumer_key = "12345-abc123fniewof2023f"
 access_token = "fwefi20r-232d-f2o2-2kd3"
 ```
 
-You could use [pocket-auth-cli](https://github.com/mheap/pocket-auth-cli) to fetch your credentials and generate this for you automatically. Then, create a file with the following contents and run it (feel free to change the regex/rules used):
+You can use [pocket-auth-cli](https://github.com/mheap/pocket-auth-cli) to fetch your credentials if needed. Then, create a file with the following contents and run it (feel free to change the regex/rules used):
 
 ```javascript
 const PocketTagger = require("pocket-tagger");
