@@ -2,7 +2,7 @@ const UrlTagger = require("url-tagger");
 const Pocket = require("pocket-promise");
 const Credentials = require("local-credentials");
 
-let init = function(account, regex, rules) {
+let init = function(account, regex, rules, cache) {
   return new Promise(async function(resolve, reject) {
     const credentials = await new Credentials("~/.pocket/credentials").get(
       account
@@ -13,7 +13,7 @@ let init = function(account, regex, rules) {
       access_token: credentials.access_token
     });
 
-    const urlTagger = new UrlTagger(regex, rules);
+    const urlTagger = new UrlTagger(regex, rules, cache);
 
     let pt = new PocketTagger(pocket, urlTagger);
     return resolve(pt);
