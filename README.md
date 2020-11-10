@@ -2,8 +2,6 @@
 
 A small node.js library for automatically tagging Pocket articles based on regular expressions
 
-[![Build Status](https://api.travis-ci.org/mheap/pocket-tagger.svg?branch=master)](https://travis-ci.org/mheap/pocket-tagger)
-
 `pocket-tagger` requires a minimum NodeJS version of 7.6
 
 ### Usage
