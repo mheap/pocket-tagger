@@ -2,7 +2,7 @@
 
 A small node.js library for automatically tagging Pocket articles based on regular expressions
 
-`pocket-tagger` requires a minimum NodeJS version of 7.6
+`pocket-tagger` requires a minimum NodeJS version of 14.x
 
 ### Usage
 
