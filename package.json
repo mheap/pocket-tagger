@@ -11,6 +11,7 @@
         "lint-fix": "eslint --fix src test"
     },
     "dependencies": {
+        "debug": "^3.2.7",
         "local-credentials": "^0.0.2",
         "pocket-promise": "^1.1.0",
         "url-tagger": "^0.1.4"

@@ -1,6 +1,7 @@
 const UrlTagger = require("url-tagger");
 const Pocket = require("pocket-promise");
 const Credentials = require("local-credentials");
+const debug = require("debug")("pocket-tagger");
 
 let init = function(account, regex, rules, cache) {
   return new Promise(async function(resolve, reject) {
@@ -40,19 +41,17 @@ PocketTagger.prototype.fetchArticles = async function(count) {
 PocketTagger.prototype.fetchTags = async function(articles) {
   let jobs = {};
   for (let itemId in articles) {
-    try {
-      // It'd be faster to wait for all of these promises to resolve at once,
-      // but then if one errors execution stops. Doing them one at a time means
-      // that we only drop the one that fails
-      jobs[itemId] = await this.urlTagger.run(articles[itemId]);
-    } catch (e) {
-      // Silently skip any fetch errors
-    }
+    debug("Processing: " + articles[itemId]);
+    jobs[itemId] = this.urlTagger.run(articles[itemId]);
   }
+
+  debug("Waiting for all pages to be fetched + analysed");
+  await Promise.allSettled(Object.values(jobs));
   return jobs;
 };
 
-PocketTagger.prototype.persistTags = async function(tags) {
+PocketTagger.prototype.persistTags = async function(articles, tags) {
+  debug("Persisting tags");
   // Loop through and use urlTagger on each
   let stats = {
     urls: 0,
@@ -63,25 +62,38 @@ PocketTagger.prototype.persistTags = async function(tags) {
   // the exising tags
   let tagActions = [];
   for (let itemId in tags) {
-    stats.urls++;
-    stats.tags += tags[itemId].length;
+    try {
+      // We still have to await here even though we used allSettled above
+      // as there's no pass by reference and we need to unwrap the promise
+      const t = await tags[itemId];
+      stats.urls++;
+      stats.tags += t.length;
 
-    let tagStr = tags[itemId].join(",");
-    if (tagStr.length === 0) {
-      tagActions.push({
-        action: "tags_clear",
-        item_id: itemId
-      });
-    } else {
+      let tagStr = t.join(",");
+      if (tagStr.length === 0) {
+        tagActions.push({
+          action: "tags_clear",
+          item_id: itemId
+        });
+      } else {
+        tagActions.push({
+          action: "tags_replace",
+          item_id: itemId,
+          tags: tagStr
+        });
+      }
+    } catch (e) {
+      debug("Error fetching URL '" + articles[itemId] + "'");
       tagActions.push({
         action: "tags_replace",
         item_id: itemId,
-        tags: tagStr
+        tags: "error-fetching"
       });
     }
   }
 
   if (tagActions.length) {
+    debug("Sending tag updates");
     await this.pocket.send({
       actions: tagActions
     });
@@ -93,7 +105,7 @@ PocketTagger.prototype.persistTags = async function(tags) {
 PocketTagger.prototype.run = async function(articleCount) {
   let articles = await this.fetchArticles(articleCount);
   let tags = await this.fetchTags(articles);
-  let stats = await this.persistTags(tags);
+  let stats = await this.persistTags(articles, tags);
 };
 
 module.exports = init;
