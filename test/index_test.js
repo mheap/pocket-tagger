@@ -22,37 +22,37 @@ function getTagger() {
       consul: "consul",
 
       // Brands
-      "hacker-news": "news.ycombinator"
+      "hacker-news": "news.ycombinator",
     },
     {
       url: {
-        "hacker-news": ["hacker-news"]
+        "hacker-news": ["hacker-news"],
       },
       content: {
         hashicorp: ["terraform", "consul"],
         dev: ["php", "javascript"],
         php: ["php"],
-        javascript: ["javascript"]
-      }
+        javascript: ["javascript"],
+      },
     }
   );
 }
 
-describe("init()", function() {
-  beforeEach(async function() {
+describe("init()", function () {
+  beforeEach(async function () {
     this.sandbox = sinon.createSandbox();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.sandbox.restore();
   });
 
-  it.skip("loads credentials from the correct place", async function() {
+  it.skip("loads credentials from the correct place", async function () {
     // @TODO: Find a way to assert based on constructor parameters
     // Credential Loading
     this.sandbox.mock(Credentials.prototype, "get").returns({
       consumer_key: "consumer",
-      access_token: "access"
+      access_token: "access",
     });
 
     // Test!
@@ -60,10 +60,10 @@ describe("init()", function() {
     expect(tagger.pocket).to.be.a(Pocket);
   });
 
-  it("creates an instance of Pocket using the correct parameters", async function() {
+  it("creates an instance of Pocket using the correct parameters", async function () {
     this.sandbox.stub(Credentials.prototype, "get").returns({
       consumer_key: "consumer",
-      access_token: "access"
+      access_token: "access",
     });
 
     const tagger = await PocketTagger("default", {}, { url: {}, content: {} });
@@ -75,28 +75,28 @@ describe("init()", function() {
     expect(tagger.pocket.config.access_token).to.eql("access");
   });
 
-  it("creates an instance of UrlTagger with the correct parameters", async function() {
+  it("creates an instance of UrlTagger with the correct parameters", async function () {
     this.sandbox.stub(Credentials.prototype, "get").returns({
       consumer_key: "consumer",
-      access_token: "access"
+      access_token: "access",
     });
 
     const regexes = {
       terraform: "terraform",
-      consul: "consul"
+      consul: "consul",
     };
 
     const rules = {
       url: {
         terraform: ["terraform"],
-        consul: ["consul"]
+        consul: ["consul"],
       },
       content: {
-        hashicorp: ["terraform", "consul"]
+        hashicorp: ["terraform", "consul"],
       },
       html: {
-        "non-hashicorp": [["!terraform", "!consul"]]
-      }
+        "non-hashicorp": [["!terraform", "!consul"]],
+      },
     };
 
     const tagger = await PocketTagger("default", regexes, rules);
@@ -114,24 +114,24 @@ describe("init()", function() {
   });
 });
 
-describe("PocketTagger", function() {
-  beforeEach(async function() {
+describe("PocketTagger", function () {
+  beforeEach(async function () {
     this.sandbox = sinon.createSandbox();
 
     this.sandbox.stub(Credentials.prototype, "get").returns({
       consumer_key: "consumer",
-      access_token: "access"
+      access_token: "access",
     });
 
     this.tagger = await getTagger();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.sandbox.restore();
   });
 
-  describe("#fetchArticles", async function() {
-    it("requests 9999 articles by default", async function() {
+  describe("#fetchArticles", async function () {
+    it("requests 9999 articles by default", async function () {
       const mock = this.sandbox.mock(Pocket.prototype, "get");
       mock
         .expects("get")
@@ -142,7 +142,7 @@ describe("PocketTagger", function() {
       mock.verify();
     });
 
-    it("passes through the requested number of articles", async function() {
+    it("passes through the requested number of articles", async function () {
       const mock = this.sandbox.mock(Pocket.prototype, "get");
       mock
         .expects("get")
@@ -153,31 +153,31 @@ describe("PocketTagger", function() {
       mock.verify();
     });
 
-    it("reformats the incoming data in to the correct format", async function() {
+    it("reformats the incoming data in to the correct format", async function () {
       const stub = this.sandbox.stub(Pocket.prototype, "get");
       stub.returns({
         list: {
           itemIdOne: { resolved_url: "http://example.com" },
-          itemIdTwo: { resolved_url: "https://sub.example.com" }
-        }
+          itemIdTwo: { resolved_url: "https://sub.example.com" },
+        },
       });
 
       expect(await this.tagger.fetchArticles()).to.eql({
         itemIdOne: "http://example.com",
-        itemIdTwo: "https://sub.example.com"
+        itemIdTwo: "https://sub.example.com",
       });
     });
   });
 
-  describe("#fetchTags", async function() {
-    it("handles no articles being passed", async function() {
+  describe("#fetchTags", async function () {
+    it("handles no articles being passed", async function () {
       const mock = this.sandbox.mock(UrlTagger.prototype, "run");
       mock.expects("run").never();
       await this.tagger.fetchTags({});
       mock.verify();
     });
 
-    it("calls urlTagger once per article", async function() {
+    it("calls urlTagger once per article", async function () {
       const mock = this.sandbox.mock(UrlTagger.prototype, "run");
       mock
         .expects("run")
@@ -192,19 +192,19 @@ describe("PocketTagger", function() {
 
       const articles = {
         itemIdOne: "http://example.com",
-        itemIdTwo: "https://sub.example.com"
+        itemIdTwo: "https://sub.example.com",
       };
 
       expect(await this.tagger.fetchTags(articles)).to.eql({
         itemIdOne: ["apple"],
-        itemIdTwo: ["orange"]
+        itemIdTwo: ["orange"],
       });
 
       mock.verify();
     });
 
     // Broken after the allSettled refactor. @TODO: Fix this
-    xit("ignores any errors and processes the other items", async function() {
+    xit("ignores any errors and processes the other items", async function () {
       const mock = this.sandbox.mock(UrlTagger.prototype, "run");
       mock
         .expects("run")
@@ -219,27 +219,27 @@ describe("PocketTagger", function() {
 
       const articles = {
         itemIdOne: "http://example.com",
-        itemIdTwo: "https://sub.example.com"
+        itemIdTwo: "https://sub.example.com",
       };
 
       console.log(await this.tagger.fetchTags(articles));
       expect(await this.tagger.fetchTags(articles)).to.eql({
-        itemIdTwo: ["orange"]
+        itemIdTwo: ["orange"],
       });
 
       mock.verify();
     });
   });
 
-  describe("#persistTags", async function() {
-    it("handles no tags being passed", async function() {
+  describe("#persistTags", async function () {
+    it("handles no tags being passed", async function () {
       const mock = this.sandbox.mock(Pocket.prototype, "send");
       mock.expects("send").never();
       await this.tagger.persistTags({}, {});
       mock.verify();
     });
 
-    it("clears tags when there are none set", async function() {
+    it("clears tags when there are none set", async function () {
       const mock = this.sandbox.mock(Pocket.prototype, "send");
       mock
         .expects("send")
@@ -248,21 +248,21 @@ describe("PocketTagger", function() {
           actions: [
             {
               action: "tags_clear",
-              item_id: "itemIdOne"
-            }
-          ]
+              item_id: "itemIdOne",
+            },
+          ],
         });
 
       await this.tagger.persistTags(
         {},
         {
-          itemIdOne: []
+          itemIdOne: [],
         }
       );
       mock.verify();
     });
 
-    it("replaces existing tags (single)", async function() {
+    it("replaces existing tags (single)", async function () {
       const mock = this.sandbox.mock(Pocket.prototype, "send");
       mock
         .expects("send")
@@ -272,21 +272,21 @@ describe("PocketTagger", function() {
             {
               action: "tags_replace",
               item_id: "itemIdOne",
-              tags: "apple"
-            }
-          ]
+              tags: "apple",
+            },
+          ],
         });
 
       await this.tagger.persistTags(
         {},
         {
-          itemIdOne: ["apple"]
+          itemIdOne: ["apple"],
         }
       );
       mock.verify();
     });
 
-    it("replaces existing tags (multiple)", async function() {
+    it("replaces existing tags (multiple)", async function () {
       const mock = this.sandbox.mock(Pocket.prototype, "send");
       mock
         .expects("send")
@@ -296,31 +296,31 @@ describe("PocketTagger", function() {
             {
               action: "tags_replace",
               item_id: "itemIdOne",
-              tags: "apple,banana"
-            }
-          ]
+              tags: "apple,banana",
+            },
+          ],
         });
 
       await this.tagger.persistTags(
         {},
         {
-          itemIdOne: ["apple", "banana"]
+          itemIdOne: ["apple", "banana"],
         }
       );
       mock.verify();
     });
 
-    it("returns statistics about the tagging", async function() {
+    it("returns statistics about the tagging", async function () {
       this.sandbox.stub(Pocket.prototype, "send");
       expect(
         await this.tagger.persistTags({}, { itemIdOne: ["apple", "banana"] })
       ).to.eql({
         tags: 2,
-        urls: 1
+        urls: 1,
       });
     });
 
-    it("passes multiple tag actions at once", async function() {
+    it("passes multiple tag actions at once", async function () {
       const mock = this.sandbox.mock(Pocket.prototype, "send");
       mock
         .expects("send")
@@ -330,18 +330,18 @@ describe("PocketTagger", function() {
             {
               action: "tags_replace",
               item_id: "itemIdOne",
-              tags: "apple,banana"
+              tags: "apple,banana",
             },
             {
               action: "tags_replace",
               item_id: "itemIdTwo",
-              tags: "mango"
+              tags: "mango",
             },
             {
               action: "tags_clear",
-              item_id: "itemIdThree"
-            }
-          ]
+              item_id: "itemIdThree",
+            },
+          ],
         });
 
       await this.tagger.persistTags(
@@ -349,15 +349,15 @@ describe("PocketTagger", function() {
         {
           itemIdOne: ["apple", "banana"],
           itemIdTwo: ["mango"],
-          itemIdThree: []
+          itemIdThree: [],
         }
       );
       mock.verify();
     });
   });
 
-  describe("#run", async function() {
-    it("chains everything together correctly", async function() {
+  describe("#run", async function () {
+    it("chains everything together correctly", async function () {
       const mock = sinon.mock(this.tagger);
       mock
         .expects("fetchArticles")
