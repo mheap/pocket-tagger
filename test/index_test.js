@@ -40,7 +40,7 @@ function getTagger() {
 
 describe("init()", function() {
   beforeEach(async function() {
-    this.sandbox = sinon.sandbox.create();
+    this.sandbox = sinon.createSandbox();
   });
 
   afterEach(function() {
@@ -116,7 +116,7 @@ describe("init()", function() {
 
 describe("PocketTagger", function() {
   beforeEach(async function() {
-    this.sandbox = sinon.sandbox.create();
+    this.sandbox = sinon.createSandbox();
 
     this.sandbox.stub(Credentials.prototype, "get").returns({
       consumer_key: "consumer",
