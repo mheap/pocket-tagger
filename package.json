@@ -1,7 +1,7 @@
 {
     "name": "pocket-tagger",
     "description": "Auto-tag articles in your Pocket account based on a list of rules",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "main": "src/index.js",
     "scripts": {
         "test": "nyc mocha",
