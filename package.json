@@ -14,7 +14,7 @@
         "debug": "^4.3.4",
         "local-credentials": "^0.0.5",
         "pocket-promise": "^1.1.0",
-        "url-tagger": "^0.1.6"
+        "url-tagger": "^0.2.0"
     },
     "devDependencies": {
         "chai": "^4.3.7",
