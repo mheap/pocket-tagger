@@ -30,6 +30,7 @@ PocketTagger.prototype.fetchArticles = async function (count) {
   count = count || 9999;
 
   let articles = (await this.pocket.get({ count: count })).list;
+  debug(`Found ${Object.keys(articles).length} articles`);
 
   let reformatted = {};
   for (var itemId in articles) {
@@ -41,7 +42,7 @@ PocketTagger.prototype.fetchArticles = async function (count) {
 PocketTagger.prototype.fetchTags = async function (articles) {
   let jobs = {};
   for (let itemId in articles) {
-    debug("Processing: " + articles[itemId]);
+    debug("Adding: " + articles[itemId]);
     jobs[itemId] = this.urlTagger.run(articles[itemId]);
   }
 
@@ -63,6 +64,7 @@ PocketTagger.prototype.persistTags = async function (articles, tags) {
   let tagActions = [];
   for (let itemId in tags) {
     try {
+      debug("Tagging: " + articles[itemId]);
       // We still have to await here even though we used allSettled above
       // as there's no pass by reference and we need to unwrap the promise
       const t = await tags[itemId];
@@ -94,9 +96,22 @@ PocketTagger.prototype.persistTags = async function (articles, tags) {
 
   if (tagActions.length) {
     debug("Sending tag updates");
-    await this.pocket.send({
-      actions: tagActions,
-    });
+
+    const chunkSize = process.env.POCKET_TAGGER_TAGS_CHUNK_SIZE || 500;
+
+    const pocketUpdates = [];
+    for (let i = 0; i < tagActions.length; i += chunkSize) {
+      debug("Sending tag updates: Chunk #" + Math.floor(i / chunkSize));
+      const chunk = tagActions.slice(i, i + chunkSize);
+      pocketUpdates.push(
+        this.pocket.send({
+          actions: chunk,
+        })
+      );
+    }
+
+    await Promise.all(pocketUpdates);
+    debug("All updates complete");
   }
 
   return stats;
