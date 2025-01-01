@@ -27,9 +27,11 @@ let PocketTagger = function (pocket, urlTagger) {
 };
 
 PocketTagger.prototype.fetchArticles = async function (count) {
-  count = count || 9999;
+  count = count || parseInt(process.env.POCKET_TAGGER_FETCH_COUNT, 10) || 500;
 
-  let articles = (await this.pocket.get({ count: count })).list;
+  let articles = (
+    await this.pocket.get({ count: count, state: "unread", sort: "newest" })
+  ).list;
   debug(`Found ${Object.keys(articles).length} articles`);
 
   let reformatted = {};
@@ -97,17 +99,24 @@ PocketTagger.prototype.persistTags = async function (articles, tags) {
   if (tagActions.length) {
     debug("Sending tag updates");
 
-    const chunkSize = process.env.POCKET_TAGGER_TAGS_CHUNK_SIZE || 500;
+    const chunkSize =
+      parseInt(process.env.POCKET_TAGGER_TAGS_CHUNK_SIZE, 10) || 20;
 
     const pocketUpdates = [];
     for (let i = 0; i < tagActions.length; i += chunkSize) {
       debug("Sending tag updates: Chunk #" + Math.floor(i / chunkSize));
       const chunk = tagActions.slice(i, i + chunkSize);
-      pocketUpdates.push(
-        this.pocket.send({
+      if (process.env.POCKET_TAGGER_TAG_SYNCHRONOUS === "true") {
+        await this.pocket.send({
           actions: chunk,
-        })
-      );
+        });
+      } else {
+        pocketUpdates.push(
+          this.pocket.send({
+            actions: chunk,
+          })
+        );
+      }
     }
 
     await Promise.all(pocketUpdates);

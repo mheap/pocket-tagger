@@ -131,12 +131,12 @@ describe("PocketTagger", function () {
   });
 
   describe("#fetchArticles", async function () {
-    it("requests 9999 articles by default", async function () {
+    it("requests 500 articles by default", async function () {
       const mock = this.sandbox.mock(Pocket.prototype, "get");
       mock
         .expects("get")
         .once()
-        .withExactArgs({ count: 9999 })
+        .withExactArgs({ count: 500, state: "unread", sort: "newest" })
         .returns({ list: [] });
       await this.tagger.fetchArticles();
       mock.verify();
@@ -147,7 +147,7 @@ describe("PocketTagger", function () {
       mock
         .expects("get")
         .once()
-        .withExactArgs({ count: 10 })
+        .withExactArgs({ count: 10, state: "unread", sort: "newest" })
         .returns({ list: [] });
       await this.tagger.fetchArticles(10);
       mock.verify();
