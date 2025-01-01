@@ -1,6 +1,6 @@
 # pocket-tagger
 
-A small node.js library for automatically tagging Pocket articles based on regular expressions
+A small node.js library for automatically tagging [Pocket](https://getpocket.com/) articles based on regular expressions
 
 `pocket-tagger` requires a minimum NodeJS version of 14.x
 
